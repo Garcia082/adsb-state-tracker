@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: adsb
+        ports: [3306:3306]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+
+    - name: Install backend deps
+      run: |
+        pip install -r backend/requirements.txt
+        pip install pytest pytest-cov
+
+    - name: Wait for MySQL ready
+      run: |
+        for i in {1..20}; do
+          mysqladmin ping -h 127.0.0.1 -uroot -proot && break
+          echo "❗ MySQL no disponible aún… reintentando"
+          sleep 3
+        done
+
+    - name: Run backend tests
+      run: pytest -q tests/
+
+  # ----------  FRONTPRUEBAS OPCIONALES  ----------
+  frontend-tests:
+    needs: backend-tests
+    if: ${{ false }}   # cámbialo a true cuando tengas tests JS
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*   # 20.x actualmente
+
+    - run: |
+        cd frontend
+        npm ci
+        npm run lint
+        npm test
