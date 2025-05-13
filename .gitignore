@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.env
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS / misc
+.DS_Store
+.idea/
+.vscode/
+
+# Docker volumes
+volumes/
+
+# DB & data
+*.db
+*.sql
+/data/*
