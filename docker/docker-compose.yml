@@ -1,14 +1,12 @@
-version: "3.9"
-
 services:
   db:
     image: mysql:8
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: adsb
     volumes:
       - db_data:/var/lib/mysql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "3306:3306"
 
@@ -25,6 +23,21 @@ services:
       MYSQL_DB: adsb
     ports:
       - "5000:5000"
+
+  integrador:
+    build:
+      context: ../integrador
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    command: ["python", "-u", "/opt/app/main.py"]
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DB: adsb
+      OPENSKY_CLIENT_ID: ${OPENSKY_CLIENT_ID}
+      OPENSKY_CLIENT_SECRET: ${OPENSKY_CLIENT_SECRET}
 
 volumes:
   db_data:
