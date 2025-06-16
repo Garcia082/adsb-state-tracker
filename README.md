@@ -103,4 +103,4 @@ Este proyecto se publica bajo licencia **MIT** – consulta el archivo [LICENSE]
 ---
 
 > Trabajo Fin de Grado • **UNIR – Grado en Ingeniería Informática**  
-> Autor © 2025 • Juan L. García
+> Autor © 2025 • Pablo García De Ávila
