@@ -1,8 +1,8 @@
 services:
   db:
     image: mysql:8
+    env_file: ../.env
     environment:
-      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: adsb
     volumes:
       - db_data:/var/lib/mysql
@@ -14,13 +14,14 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+    env_file: ../.env
     depends_on:
       - db
     environment:
-      MYSQL_HOST: db
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
-      MYSQL_DB: adsb
+      MYSQL_DB: ${MYSQL_DB}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "5000:5000"
 
@@ -28,14 +29,15 @@ services:
     build:
       context: ../integrador
       dockerfile: Dockerfile
+    env_file: ../.env
     depends_on:
       - db
     command: ["python", "-u", "/opt/app/main.py"]
     environment:
-      MYSQL_HOST: db
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
-      MYSQL_DB: adsb
+      MYSQL_DB: ${MYSQL_DB}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       OPENSKY_CLIENT_ID: ${OPENSKY_CLIENT_ID}
       OPENSKY_CLIENT_SECRET: ${OPENSKY_CLIENT_SECRET}
 
