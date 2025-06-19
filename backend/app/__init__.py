@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 db = SQLAlchemy()
@@ -23,19 +23,19 @@ def create_app():
 
     @app.route("/api/aeronaves")
     def listar_aeronaves():
-        regs = Aeronave.query.all()
-        return jsonify([
-            {
-                "icao24":   a.icao24,
-                "callsign": a.callsign,
-                "lat":      a.lat,
-                "lon":      a.lon,
-                "alt":      a.alt,
-                "vel":      a.vel,
-                "is_state": bool(a.is_state),
-                "last_seen": a.last_seen.isoformat() if a.last_seen else None
-            } for a in regs
-        ])
+        ahora = datetime.utcnow()
+        hace_60s = ahora - timedelta(seconds=60)
+
+        regs = (Aeronave.query
+                       .filter(Aeronave.last_seen >= hace_60s)
+                       .all())
+        return jsonify([{
+            "icao24": a.icao24,
+            "callsign": a.callsign,
+            "lat": a.lat, "lon": a.lon,
+            "alt": a.alt, "vel": a.vel,
+            "is_state": bool(a.is_state)
+        } for a in regs])
 
     @app.route("/api/autorizacion/<icao24>")
     def autorizacion(icao24):
@@ -76,5 +76,5 @@ def create_app():
             ), 404
         return e
     # --------------------------------------------------
-
+  
     return app

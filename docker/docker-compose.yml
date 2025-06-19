@@ -41,5 +41,14 @@ services:
       OPENSKY_CLIENT_ID: ${OPENSKY_CLIENT_ID}
       OPENSKY_CLIENT_SECRET: ${OPENSKY_CLIENT_SECRET}
 
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"          # expón el puerto que quieras
+    depends_on:
+      - backend
+ 
 volumes:
   db_data:
